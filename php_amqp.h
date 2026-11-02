@@ -83,6 +83,12 @@ extern zend_module_entry amqp_module_entry;
 #if PHP_VERSION_ID < 80200
     #define zend_ini_parse_quantity_warn(v, name) (zend_atol(ZSTR_VAL(v), ZSTR_LEN(v)))
 #endif
+#if PHP_VERSION_ID < 80600
+    /* PHP 8.6 removed INI_STR(), INI_INT() and INI_FLT() in favour of these */
+    #define zend_ini_string_literal(name) INI_STR(name)
+    #define zend_ini_long_literal(name) INI_INT(name)
+    #define zend_ini_double_literal(name) INI_FLT(name)
+#endif
 
 #define PHP_AMQP_NULLABLE_DEFAULT_INIT(val, nullable)                                                                  \
     zval val;                                                                                                          \
@@ -305,12 +311,12 @@ struct _amqp_connection_object {
 
 static inline amqp_connection_object *php_amqp_connection_object_fetch(zend_object *obj)
 {
-    return (amqp_connection_object *) ((char *) obj - XtOffsetOf(amqp_connection_object, zo));
+    return (amqp_connection_object *) ((char *) obj - offsetof(amqp_connection_object, zo));
 }
 
 static inline amqp_channel_object *php_amqp_channel_object_fetch(zend_object *obj)
 {
-    return (amqp_channel_object *) ((char *) obj - XtOffsetOf(amqp_channel_object, zo));
+    return (amqp_channel_object *) ((char *) obj - offsetof(amqp_channel_object, zo));
 }
 
 #define PHP_AMQP_GET_CONNECTION(obj) php_amqp_connection_object_fetch(Z_OBJ_P(obj))
